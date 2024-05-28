@@ -1,7 +1,7 @@
-class Platform:
-    def __init__(self, game, p_type, variant, pos):
+class Floor():
+    def __init__(self, game, f_type, variant, pos):
         self.game = game
-        self.type = p_type
+        self.type = f_type
         self.variant = variant
         self.pos = list(pos)
 
@@ -14,24 +14,25 @@ class Platform:
                 player_rect.y = self.rect.top - player_rect.height
                 return True
         return False
-
+    
     def place(self, surf, offset=(0,0)):
         surf.blit(self.image, (self.pos[0] - offset[0], self.pos[1] - offset[1]))
 
-class Platforms:
-    def __init__(self):
-        self.platforms = []
 
-    def add_platform(self, *platforms):
-        for platform in platforms:
-            self.platforms.append(platform)
-    
+class Floors:
+    def __init__(self):
+        self.floors = []
+
+    def add_floor(self, *floors):
+        for floor in floors:
+            self.floors.append(floor)
+
     def check_player_collision(self, player_rect, velocity):        
-        for platform in self.platforms:
-            if platform.player_collision(player_rect, velocity):
+        for floor in self.floors:
+            if floor.player_collision(player_rect, velocity):
                 return True
-        return False
+        return False            
     
     def render(self, surf, offset=(0,0)):
-        for platform in self.platforms:
-            platform.place(surf, offset)
+        for floor in self.floors:
+            floor.place(surf, offset)

@@ -33,11 +33,15 @@ class Player:
         self.rect.x += frame_movement[0] * 2
         self.rect.y += frame_movement[1] * 1.7
 
+        if self.rect.top > HEIGHT:
+            self.game.die = True
+        
+        self.game.traps.check_player_collision(self.rect)
+        self.game.checkpoints.check_player_collision(self.rect)
+
         #capire quando il player tocca il pavimento che può essere il pavimento ma anche una piattaforma
         #prima cosa vediamo quando tocca il pavimento
-        #essendo che tutto dritto, confrontiamo la sua y
-        if self.rect.y > FLOOR:
-            self.rect.y = FLOOR
+        if self.game.floors.check_player_collision(self.rect, self.velocity[1]):
             self.collisions['down'] = True
             self.num_jumps = 1
         
@@ -46,11 +50,11 @@ class Player:
             self.rect.x = self.offset[0]
         
         #ora capire quando tocca una piattaforma
-        for platform in self.game.platforms.platforms:
-            if self.rect.colliderect(platform.rect) and self.velocity[1] > 0:
-                self.rect.y = platform.rect.top - self.rect.height
-                self.collisions['down'] = True
-                self.num_jumps = 1
+        if self.game.platforms.check_player_collision(self.rect, self.velocity[1]):
+            self.collisions['down'] = True
+            self.num_jumps = 1
+
+
 
         if movement[0] != 0 and self.collisions['down']:
             self.set_action('run')
