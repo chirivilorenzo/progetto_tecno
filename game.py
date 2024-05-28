@@ -47,7 +47,7 @@ class Game:
             self.scroll[0] += 0.3
             self.display.blit(self.assets['background'], (0,0))
 
-            self.createFloor(1, 20)
+            self.createFloor(1, 5)
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
