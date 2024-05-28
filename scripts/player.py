@@ -38,6 +38,7 @@ class Player:
         
         self.game.traps.check_player_collision(self.rect)
         self.game.checkpoints.check_player_collision(self.rect)
+        self.game.fruits.check_player_collision(self.rect)
 
         #capire quando il player tocca il pavimento che può essere il pavimento ma anche una piattaforma
         #prima cosa vediamo quando tocca il pavimento

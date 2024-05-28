@@ -25,6 +25,7 @@ class Editor:
             'box': load_images('Boxes'),
             'checkpoint': load_images('Checkpoints'),
             'first_player_img': load_image('Characters/Virtual Guy/idle/00.png'),
+            'fruit': load_images('Fruits')
         }
 
         self.type = 0

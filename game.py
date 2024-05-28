@@ -8,6 +8,7 @@ from scripts.platforms import Platform, Platforms
 from scripts.floors import Floor, Floors
 from scripts.traps import Trap, Traps
 from scripts.checkpoints import Checkpoint, Checkpoints
+from scripts.fruit import Fruit, Fruits
 from scripts.map import Map
 
 class Game:
@@ -26,6 +27,7 @@ class Game:
         self.floors = Floors()
         self.traps = Traps()
         self.checkpoints = Checkpoints()
+        self.fruits = Fruits()
 
         self.map = Map(self, 'map.json')
         self.item_list = self.map.load()
@@ -42,6 +44,7 @@ class Game:
             'player/idle': Animation(load_images('Characters/Virtual Guy/idle')),
             'player/run': Animation(load_images('Characters/Virtual Guy/run')),
             'player/jump': Animation(load_images('Characters/Virtual Guy/jump')),
+            'fruit': load_images('Fruits'),
         }
 
         self.player = Player(self, START_POINT, self.scroll)
@@ -62,12 +65,8 @@ class Game:
                 self.traps.add_trap(Trap(self, item['type'], item['variant'], item['position']))
             if item['type'] == 'checkpoint':
                 self.checkpoints.add_checkpoint(Checkpoint(self, item['type'], item['variant'], item['position']))
-
-        #mettere tutti gli ostacoli così
-        #platform1 = Platform(self, 'base', 0, (200, 150))
-        #platform2 = Platform(self, 'base', 1, (150, 150))
-        #self.platforms = Platforms()
-        #self.platforms.add_platform(platform1, platform2)
+            if item['type'] == 'fruit':
+                self.fruits.add_fruit(Fruit(self, item['type'], item['variant'], item['position']))
 
 
     def run(self):
@@ -104,6 +103,7 @@ class Game:
             self.platforms.render(self.display, self.scroll)
             self.traps.render(self.display, self.scroll)
             self.checkpoints.render(self.display, self.scroll)
+            self.fruits.render(self.display, self.scroll)
             self.player.render(self.display)
 
             self.screen.blit(pygame.transform.scale(self.display, self.screen.get_size()), (0,0))
