@@ -80,12 +80,17 @@ class Player:
         else:
             self.velocity[1] = 0
     
+    def check_collision(self):
+        self.game.traps.check_player_collision(self.rect)
+        self.game.checkpoints.check_player_collision(self.rect)
+        self.game.fruits.check_player_collision(self.rect)
+    
     def jump(self):
-            if self.num_jumps > 0:
-                self.num_jumps -= 1
-                self.set_action('jump')
-                self.velocity[1] = -3
-                self.collisions['down'] = False
+        if self.num_jumps > 0:
+            self.num_jumps -= 1
+            self.set_action('jump')
+            self.velocity[1] = -3
+            self.collisions['down'] = False
     
     def render(self, surf):
         surf.blit(pygame.transform.flip(self.animation.img(), self.flip, False), (self.rect.x - self.offset[0], self.rect.y - self.offset[1]))

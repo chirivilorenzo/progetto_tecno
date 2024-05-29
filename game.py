@@ -1,5 +1,7 @@
+import neat.population
 import pygame
-import random
+import os
+import neat
 from sys import exit
 from settings import *
 from scripts.utils import load_image, load_images, Animation
@@ -47,7 +49,7 @@ class Game:
             'fruit': load_images('Fruits'),
         }
 
-        self.player = Player(self, START_POINT, self.scroll)
+        #self.player = Player(self, START_POINT, self.scroll)
         self.die = False
         self.win = False
 
@@ -91,12 +93,15 @@ class Game:
                         self.movement[1] = False
                     if event.key == pygame.K_LEFT:
                         self.movement[0] = False
+            
+            self.player.check_collision()
 
             if self.die:
                 break
 
             if self.win:
                 break
+
             
             self.player.update((self.movement[1] - self.movement[0], 0))
             self.floors.render(self.display, self.scroll)
@@ -109,4 +114,91 @@ class Game:
             self.screen.blit(pygame.transform.scale(self.display, self.screen.get_size()), (0,0))
             pygame.display.update()
             self.clock.tick(60)
-Game().run()
+    
+    def train_ai(self, ge, nets, players):
+        while True:
+            print(len(players))
+            self.scroll[0] += 0.5
+            self.display.blit(self.assets['background'], (0,0))
+
+            #if len(players) == 0:
+            #    self.die = True
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    exit()
+
+            for i, player in enumerate(players):
+                output = nets[i].activate((player.rect.x, player.rect.y)) #manca la distanza tra le cose
+                decision = output.index(max(output))
+
+                if decision == 0:
+                    player.jump()
+                elif decision == 1:
+                    player.update((-1, 0))
+                else:
+                    player.update((1, 0))
+
+                player.check_collision()
+
+                if self.die:
+                    ge[i].fitness -= 10
+                    players.pop(i)
+                    ge.pop(i)
+                    nets.pop(i)
+                    self.die = False
+                
+                player.render(self.display)
+        
+
+            print(output)
+            
+            
+            self.floors.render(self.display, self.scroll)
+            self.platforms.render(self.display, self.scroll)
+            self.traps.render(self.display, self.scroll)
+            self.checkpoints.render(self.display, self.scroll)
+            self.fruits.render(self.display, self.scroll)
+
+            self.screen.blit(pygame.transform.scale(self.display, self.screen.get_size()), (0,0))
+            pygame.display.update()
+            self.clock.tick(60)
+
+#Game().run()
+
+
+def eval_genomes(genomes, config):
+    ge = []
+    nets = []
+    players = []
+    game = Game()
+
+    for genome_id, genome in genomes:
+        players.append(Player(game, START_POINT, (0.5, 0)))
+        ge.append(genome)
+        net = neat.nn.FeedForwardNetwork.create(genome, config)
+        nets.append(net)
+        genome.fitness = 0
+
+    game.train_ai(ge, nets, players)
+    
+    
+
+def run_neat(config):
+    p = neat.Population(config)
+    p.add_reporter(neat.StdOutReporter(True))
+    stats = neat.StatisticsReporter()
+    p.add_reporter(stats)
+
+    p.run(eval_genomes, 10)
+
+if __name__ == '__main__':
+    local_dir = os.path.dirname(__file__)
+    config_path = os.path.join(local_dir, "config.txt")
+
+    config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
+                         neat.DefaultSpeciesSet, neat.DefaultStagnation,
+                         config_path)
+
+    run_neat(config)
