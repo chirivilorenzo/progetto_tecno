@@ -136,20 +136,23 @@ class Game:
                 if decision == 0:
                     player.jump()
                 elif decision == 1:
-                    player.update((-1, 0))
+                    self.movement[1] = True
+                elif decision == 2:
+                    self.movement[0] = True
                 else:
-                    player.update((1, 0))
+                    self.movement[0] = False
+                    self.movement[1] = False
 
-                player.check_collision()
-
-                if self.die:
-                    ge[i].fitness -= 10
+                player.update((self.movement[1] - self.movement[0], 0))
+                player.render(self.display)
+                self.movement[0] = False
+                self.movement[1] = False             
+                
+                if player.check_collision():
+                    #ge[i].fitness -= 10
                     players.pop(i)
                     ge.pop(i)
                     nets.pop(i)
-                    self.die = False
-                
-                player.render(self.display)
         
 
             print(output)

@@ -10,7 +10,8 @@ class Trap():
 
     def player_collision(self, player_rect):
         if self.rect.colliderect(player_rect):
-            self.game.die = True
+            #self.game.die = True
+            print(f'Trap collision at {self.pos} with player at {player_rect.topleft}')
             return True
     
     def place(self, surf, offset=(0,0)):
@@ -29,7 +30,7 @@ class Traps:
         for trap in self.traps:
             if trap.player_collision(player_rect):
                 return True
-        return False            
+        return False
     
     def render(self, surf, offset=(0,0)):
         for trap in self.traps:
