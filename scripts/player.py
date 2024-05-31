@@ -28,7 +28,7 @@ class Player:
         self.collisions = {'up': False, 'down': False, 'left': False, 'right': False}
 
         #movimento che fa il player in un frame
-        frame_movement = (movement[0] + self.velocity[0], movement[1] + self.velocity[1])
+        frame_movement = (movement[0] + self.velocity[0] + self.last_movement[0], movement[1] + self.velocity[1] + self.last_movement[1])
 
         self.rect.x += frame_movement[0] * 2
         self.rect.y += frame_movement[1] * 1.7
@@ -49,6 +49,10 @@ class Player:
         #ora vediamo quando colpisce il bordo sinistro
         if self.rect.x < self.offset[0]:
             self.rect.x = self.offset[0]
+        
+        #bordo destro
+        if self.rect.x > self.offset[0] + WIDTH/2 - self.rect.width:
+            self.rect.x = self.offset[0] + WIDTH/2 - self.rect.width
         
         #ora capire quando tocca una piattaforma
         if self.game.platforms.check_player_collision(self.rect, self.velocity[1]):

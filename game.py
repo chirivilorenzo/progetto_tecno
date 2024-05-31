@@ -72,6 +72,7 @@ class Game:
 
 
     def run(self):
+        punti = 0
         while True:
             self.scroll[0] += 0.5
             self.display.blit(self.assets['background'], (0,0))
@@ -94,12 +95,21 @@ class Game:
                     if event.key == pygame.K_LEFT:
                         self.movement[0] = False
             
-            self.player.check_collision()
+            if self.traps.check_player_collision(self.player.rect):
+                break
+            if self.fruits.check_player_collision(self.player.rect):
+                punti += 5
+            self.checkpoints.check_player_collision(self.player.rect)
+
+            punti += 0.1
+            punti += self.player.rect.x * 0.01
 
             if self.die:
                 break
 
             if self.win:
+                punti += 50
+                print(str(punti))
                 break
 
             
@@ -116,8 +126,8 @@ class Game:
             self.clock.tick(60)
     
     def train_ai(self, ge, nets, players):
+        output_neutro = [0.0, 0.0, 0.0, 0.0]
         while True:
-            print(len(players))
             self.scroll[0] += 0.5
             self.display.blit(self.assets['background'], (0,0))
 
@@ -131,35 +141,55 @@ class Game:
 
             for i, player in enumerate(players):    
                 next_platform = self.platforms.get_next_platform(player.rect)
-                next_trap = self.traps.get_next_trap(player.rect)
+                next_trap = self.traps.get_next_trap(player.rect, self.scroll)
                 next_fruit = self.fruits.get_next_fruit(player.rect)
                 next_checkpoint = self.checkpoints.get_next_checkpoint(player.rect)
 
                 next_platform_pos = (next_platform.rect.x, next_platform.rect.y) if next_platform else (0, 0)
+                distanceBetweenPlatPlayer_x = next_platform.rect.x - player.rect.x - player.rect.width if next_platform else 0
+                distanceBetweenPlatPlayer_y = next_platform.rect.y - player.rect.y - player.rect.height if next_platform else 0
+
                 next_trap_pos = (next_trap.rect.x, next_trap.rect.y) if next_trap else (0, 0)
+                distanceBetweenTrapPlayer_x = next_trap.rect.x - player.rect.x - player.rect.width if next_trap else 0
+                distanceBetweenTrapPlayer_y = next_trap.rect.y - player.rect.y - player.rect.height if next_trap else 0                
+
                 next_fruit_pos = (next_fruit.rect.x, next_fruit.rect.y) if next_fruit else (0, 0)
+                distanceBetweenFruitPlayer_x = next_fruit.rect.x - player.rect.x - player.rect.width if next_fruit else 0
+                distanceBetweenFruitPlayer_y = next_fruit.rect.y - player.rect.y - player.rect.height if next_fruit else 0
+
                 next_checkpoint_pos = (next_checkpoint.rect.x, next_checkpoint.rect.y) if next_checkpoint else (0, 0)
+                distanceBetweenCheckPlayer_x = next_checkpoint.rect.x - player.rect.x - player.rect.width if next_checkpoint else 0
+                distanceBetweenCheckPlayer_y = next_checkpoint.rect.y - player.rect.y - player.rect.height if next_checkpoint else 0
 
                 inputs = (
                     player.rect.x, player.rect.y,
                     next_platform_pos[0], next_platform_pos[1],
+                    distanceBetweenPlatPlayer_x, distanceBetweenPlatPlayer_y,
                     next_trap_pos[0], next_trap_pos[1],
+                    distanceBetweenTrapPlayer_x, distanceBetweenTrapPlayer_y,
                     next_fruit_pos[0], next_fruit_pos[1],
-                    next_checkpoint_pos[0], next_checkpoint_pos[1]
+                    distanceBetweenFruitPlayer_x, distanceBetweenFruitPlayer_y,
+                    next_checkpoint_pos[0], next_checkpoint_pos[1],
+                    distanceBetweenCheckPlayer_x, distanceBetweenCheckPlayer_y
                 )
 
                 output = nets[i].activate(inputs)
                 decision = output.index(max(output))
 
-                if decision == 0:
-                    player.jump()
-                elif decision == 1:
-                    self.movement[1] = True
-                elif decision == 2:
-                    self.movement[0] = True
+                if output != output_neutro:
+                    if decision == 0:
+                        player.jump()
+                    elif decision == 1:
+                        self.movement[0] = True
+                    elif decision == 2:
+                        self.movement[1] = True
+                    else:
+                        self.movement[0] = False
+                        self.movement[1] = False
                 else:
                     self.movement[0] = False
-                    self.movement[1] = False
+                    self.movement[1] = False                    
+            
 
                 player.update((self.movement[1] - self.movement[0], 0))
                 player.render(self.display)
@@ -176,8 +206,7 @@ class Game:
                     ge.pop(i)
                     nets.pop(i)
                     continue
-
-
+                
                 if self.checkpoints.check_player_collision(player.rect):
                     ge[i].fitness += 50
                     players.pop(i)
@@ -186,7 +215,7 @@ class Game:
                     continue       
         
 
-            print(output)
+            #print(output)
             
             
             self.floors.render(self.display, self.scroll)
@@ -225,7 +254,7 @@ def run_neat(config):
     stats = neat.StatisticsReporter()
     p.add_reporter(stats)
 
-    p.run(eval_genomes, 10)
+    p.run(eval_genomes, 500)
 
 if __name__ == '__main__':
     local_dir = os.path.dirname(__file__)

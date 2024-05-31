@@ -11,6 +11,7 @@ class Checkpoint():
     def player_collision(self, player_rect):
         if self.rect.colliderect(player_rect):
             self.game.win = True
+            return True
     
     def place(self, surf, offset=(0,0)):
         surf.blit(self.image, (self.pos[0] - offset[0], self.pos[1] - offset[1]))

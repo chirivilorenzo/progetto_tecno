@@ -24,7 +24,6 @@ class Editor:
             'trap': load_images('Traps'),
             'box': load_images('Boxes'),
             'checkpoint': load_images('Checkpoints'),
-            'first_player_img': load_image('Characters/Virtual Guy/idle/00.png'),
             'fruit': load_images('Fruits')
         }
 
@@ -77,7 +76,6 @@ class Editor:
         while True:
 
             self.display.fill((0,0,0))
-            self.display.blit(self.assets['first_player_img'], (START_POINT))
 
             #serve per muovere la telecamera con wasd
             self.scroll[0] += (self.movement[1] - self.movement[0]) * 2

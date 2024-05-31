@@ -31,11 +31,11 @@ class Traps:
                 return True
         return False
 
-    def get_next_trap(self, player_rect):
+    def get_next_trap(self, player_rect, offset=(0,0)):
         min_distance = float('inf')
         next_trap = None
         for trap in self.traps:
-            distance = trap.rect.x - player_rect.x
+            distance = trap.rect.x - player_rect.x - player_rect.width
             if distance > 0 and distance < min_distance:
                 min_distance = distance
                 next_trap = trap
