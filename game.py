@@ -117,12 +117,11 @@ class Game:
     
     def train_ai(self, ge, nets, players):
         while True:
-            print(len(players))
             self.scroll[0] += 0.5
             self.display.blit(self.assets['background'], (0,0))
 
-            #if len(players) == 0:
-            #    self.die = True
+            if len(players) == 0:
+                break
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -149,10 +148,12 @@ class Game:
                 self.movement[1] = False             
                 
                 if player.check_collision():
-                    #ge[i].fitness -= 10
+                    ge[i].fitness -= 10
                     players.pop(i)
                     ge.pop(i)
                     nets.pop(i)
+                else:
+                    ge[i].fitness += 1
         
 
             print(output)
@@ -178,7 +179,7 @@ def eval_genomes(genomes, config):
     game = Game()
 
     for genome_id, genome in genomes:
-        players.append(Player(game, START_POINT, (0.5, 0)))
+        players.append(Player(game, START_POINT, game.scroll))
         ge.append(genome)
         net = neat.nn.FeedForwardNetwork.create(genome, config)
         nets.append(net)
