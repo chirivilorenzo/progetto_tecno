@@ -30,6 +30,16 @@ class Traps:
             if trap.player_collision(player_rect):
                 return True
         return False
+
+    def get_next_trap(self, player_rect):
+        min_distance = float('inf')
+        next_trap = None
+        for trap in self.traps:
+            distance = trap.rect.x - player_rect.x
+            if distance > 0 and distance < min_distance:
+                min_distance = distance
+                next_trap = trap
+        return next_trap
     
     def render(self, surf, offset=(0,0)):
         for trap in self.traps:

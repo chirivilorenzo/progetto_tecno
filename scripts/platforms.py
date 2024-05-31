@@ -31,6 +31,16 @@ class Platforms:
             if platform.player_collision(player_rect, velocity):
                 return True
         return False
+
+    def get_next_platform(self, player_rect):
+        min_distance = float('inf')
+        next_platform = None
+        for platform in self.platforms:
+            distance = platform.rect.x - player_rect.x
+            if distance > 0 and distance < min_distance:
+                min_distance = distance
+                next_platform = platform
+        return next_platform
     
     def render(self, surf, offset=(0,0)):
         for platform in self.platforms:

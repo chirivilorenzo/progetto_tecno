@@ -28,7 +28,17 @@ class Checkpoints:
         for checkpoint in self.checkpoints:
             if checkpoint.player_collision(player_rect):
                 return True
-        return False            
+        return False
+    
+    def get_next_checkpoint(self, player_rect):
+        min_distance = float('inf')
+        next_checkpoint = None
+        for checkpoint in self.checkpoints:
+            distance = checkpoint.rect.x - player_rect.x
+            if distance > 0 and distance < min_distance:
+                min_distance = distance
+                next_checkpoint = checkpoint
+        return next_checkpoint
     
     def render(self, surf, offset=(0,0)):
         for checkpoint in self.checkpoints:

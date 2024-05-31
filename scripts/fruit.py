@@ -28,7 +28,17 @@ class Fruits:
     def check_player_collision(self, player_rect):        
         for fruit in self.fruits:
             if fruit.player_collision(player_rect):
-                self.fruits.remove(fruit)         
+                self.fruits.remove(fruit)
+
+    def get_next_fruit(self, player_rect):
+        min_distance = float('inf')
+        next_fruit = None
+        for fruit in self.fruits:
+            distance = fruit.rect.x - player_rect.x
+            if distance > 0 and distance < min_distance:
+                min_distance = distance
+                next_fruit = fruit
+        return next_fruit       
     
     def render(self, surf, offset=(0,0)):
         for fruit in self.fruits:

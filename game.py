@@ -117,6 +117,7 @@ class Game:
     
     def train_ai(self, ge, nets, players):
         while True:
+            print(len(players))
             self.scroll[0] += 0.5
             self.display.blit(self.assets['background'], (0,0))
 
@@ -128,8 +129,26 @@ class Game:
                     pygame.quit()
                     exit()
 
-            for i, player in enumerate(players):
-                output = nets[i].activate((player.rect.x, player.rect.y)) #manca la distanza tra le cose
+            for i, player in enumerate(players):    
+                next_platform = self.platforms.get_next_platform(player.rect)
+                next_trap = self.traps.get_next_trap(player.rect)
+                next_fruit = self.fruits.get_next_fruit(player.rect)
+                next_checkpoint = self.checkpoints.get_next_checkpoint(player.rect)
+
+                next_platform_pos = (next_platform.rect.x, next_platform.rect.y) if next_platform else (0, 0)
+                next_trap_pos = (next_trap.rect.x, next_trap.rect.y) if next_trap else (0, 0)
+                next_fruit_pos = (next_fruit.rect.x, next_fruit.rect.y) if next_fruit else (0, 0)
+                next_checkpoint_pos = (next_checkpoint.rect.x, next_checkpoint.rect.y) if next_checkpoint else (0, 0)
+
+                inputs = (
+                    player.rect.x, player.rect.y,
+                    next_platform_pos[0], next_platform_pos[1],
+                    next_trap_pos[0], next_trap_pos[1],
+                    next_fruit_pos[0], next_fruit_pos[1],
+                    next_checkpoint_pos[0], next_checkpoint_pos[1]
+                )
+
+                output = nets[i].activate(inputs)
                 decision = output.index(max(output))
 
                 if decision == 0:
@@ -144,16 +163,27 @@ class Game:
 
                 player.update((self.movement[1] - self.movement[0], 0))
                 player.render(self.display)
-                self.movement[0] = False
-                self.movement[1] = False             
+
+                ge[i].fitness += 0.1
+                ge[i].fitness += player.rect.x * 0.01
+
+                if self.fruits.check_player_collision(player.rect):
+                    ge[i].fitness += 5
                 
-                if player.check_collision():
+                if self.traps.check_player_collision(player.rect):
                     ge[i].fitness -= 10
                     players.pop(i)
                     ge.pop(i)
                     nets.pop(i)
-                else:
-                    ge[i].fitness += 1
+                    continue
+
+
+                if self.checkpoints.check_player_collision(player.rect):
+                    ge[i].fitness += 50
+                    players.pop(i)
+                    ge.pop(i)
+                    nets.pop(i)
+                    continue       
         
 
             print(output)
