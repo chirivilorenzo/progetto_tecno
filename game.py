@@ -45,11 +45,11 @@ class Game:
             'first_player_img': load_image('Characters/Virtual Guy/idle/00.png'),
             'player/idle': Animation(load_images('Characters/Virtual Guy/idle')),
             'player/run': Animation(load_images('Characters/Virtual Guy/run')),
-            'player/jump': Animation(load_images('Characters/Virtual Guy/jump')),
+            'player/jump': Animation(load_images('Characters/Virtual Guy/jump')),           
             'fruit': load_images('Fruits'),
         }
 
-        #self.player = Player(self, START_POINT, self.scroll)
+        self.player = Player(self, START_POINT, self.scroll)
         self.die = False
         self.win = False
 
@@ -70,9 +70,7 @@ class Game:
             if item['type'] == 'fruit':
                 self.fruits.add_fruit(Fruit(self, item['type'], item['variant'], item['position']))
 
-
     def run(self):
-        punti = 0
         while True:
             self.scroll[0] += 0.5
             self.display.blit(self.assets['background'], (0,0))
@@ -95,24 +93,16 @@ class Game:
                     if event.key == pygame.K_LEFT:
                         self.movement[0] = False
             
-            if self.traps.check_player_collision(self.player.rect):
-                break
-            if self.fruits.check_player_collision(self.player.rect):
-                punti += 5
+            self.traps.check_player_collision(self.player.rect)
+            self.fruits.check_player_collision(self.player.rect)
             self.checkpoints.check_player_collision(self.player.rect)
 
-            punti += 0.1
-            punti += self.player.rect.x * 0.01
-
             if self.die:
-                break
+                return self.show_game_over_screen()
 
             if self.win:
-                punti += 50
-                print(str(punti))
-                break
+                return self.show_game_over_screen()
 
-            
             self.player.update((self.movement[1] - self.movement[0], 0))
             self.floors.render(self.display, self.scroll)
             self.platforms.render(self.display, self.scroll)
@@ -189,7 +179,6 @@ class Game:
                 else:
                     self.movement[0] = False
                     self.movement[1] = False                    
-            
 
                 player.update((self.movement[1] - self.movement[0], 0))
                 player.render(self.display)
@@ -214,10 +203,6 @@ class Game:
                     nets.pop(i)
                     continue       
         
-
-            #print(output)
-            
-            
             self.floors.render(self.display, self.scroll)
             self.platforms.render(self.display, self.scroll)
             self.traps.render(self.display, self.scroll)
@@ -228,40 +213,108 @@ class Game:
             pygame.display.update()
             self.clock.tick(60)
 
-#Game().run()
+    def show_game_over_screen(self):
+        while True:
+            self.screen.fill((0, 0, 0))
+            font = pygame.font.Font(None, 74)
+            if self.die == True:
+                text = font.render("Game Over", True, (255, 255, 255))
+            else:
+                text = font.render("You Won", True, (255, 255, 255))
+            self.screen.blit(text, (WIDTH // 2 - text.get_width() // 2, HEIGHT // 2 - 100))
 
+            font = pygame.font.Font(None, 50)
+            text = font.render("Press R to Retry or M for Main Menu", True, (255, 255, 255))
+            self.screen.blit(text, (WIDTH // 2 - text.get_width() // 2, HEIGHT // 2))
 
-def eval_genomes(genomes, config):
-    ge = []
-    nets = []
-    players = []
-    game = Game()
+            pygame.display.flip()
 
-    for genome_id, genome in genomes:
-        players.append(Player(game, START_POINT, game.scroll))
-        ge.append(genome)
-        net = neat.nn.FeedForwardNetwork.create(genome, config)
-        nets.append(net)
-        genome.fitness = 0
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    exit()
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_r:
+                        return 'retry'
+                    if event.key == pygame.K_m:
+                        return 'menu'
 
-    game.train_ai(ge, nets, players)
-    
-    
+class NeatAI:
+    def __init__(self):
+        local_dir = os.path.dirname(__file__)
+        config_path = os.path.join(local_dir, "config.txt")
 
-def run_neat(config):
-    p = neat.Population(config)
-    p.add_reporter(neat.StdOutReporter(True))
-    stats = neat.StatisticsReporter()
-    p.add_reporter(stats)
+        config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
+                            neat.DefaultSpeciesSet, neat.DefaultStagnation,
+                            config_path)
 
-    p.run(eval_genomes, 500)
+        self.run_neat(config)      
+
+    def eval_genomes(self, genomes, config):
+        ge = []
+        nets = []
+        players = []
+        game = Game()
+
+        for genome_id, genome in genomes:
+            players.append(Player(game, START_POINT, game.scroll))
+            ge.append(genome)
+            net = neat.nn.FeedForwardNetwork.create(genome, config)
+            nets.append(net)
+            genome.fitness = 0
+
+        game.train_ai(ge, nets, players)
+            
+
+    def run_neat(self, config):
+        p = neat.Population(config)
+        p.add_reporter(neat.StdOutReporter(True))
+        stats = neat.StatisticsReporter()
+        p.add_reporter(stats)
+
+        result = p.run(self.eval_genomes, 500)
+        return result
+
+def show_start_screen(screen):
+    while True:
+        screen.fill((0, 0, 0))
+        font = pygame.font.Font(None, 74)
+        text = font.render("2D Game", True, (255, 255, 255))
+        screen.blit(text, (WIDTH // 2 - text.get_width() // 2, HEIGHT // 2 - 100))
+
+        font = pygame.font.Font(None, 50)
+        text = font.render("Press P to Play or A for AI", True, (255, 255, 255))
+        screen.blit(text, (WIDTH // 2 - text.get_width() // 2, HEIGHT // 2))
+
+        pygame.display.flip()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_p:
+                    return 'play'
+                if event.key == pygame.K_a:
+                    return 'ai'
+
+def main():
+    pygame.init()
+    screen = pygame.display.set_mode((WIDTH, HEIGHT))
+
+    while True:
+        choice = show_start_screen(screen)
+
+        if choice == 'play':
+            result = 'retry'
+            while result == 'retry':
+                game = Game()
+                result = game.run()
+            if result == 'menu':
+                continue
+
+        elif choice == 'ai':
+            NeatAI()
 
 if __name__ == '__main__':
-    local_dir = os.path.dirname(__file__)
-    config_path = os.path.join(local_dir, "config.txt")
-
-    config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
-                         neat.DefaultSpeciesSet, neat.DefaultStagnation,
-                         config_path)
-
-    run_neat(config)
+    main()

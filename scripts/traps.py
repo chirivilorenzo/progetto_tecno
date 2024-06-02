@@ -10,7 +10,7 @@ class Trap():
 
     def player_collision(self, player_rect):
         if self.rect.colliderect(player_rect):
-            #self.game.die = True
+            self.game.die = True
             return True
     
     def place(self, surf, offset=(0,0)):

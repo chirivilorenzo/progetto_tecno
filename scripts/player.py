@@ -30,15 +30,12 @@ class Player:
         #movimento che fa il player in un frame
         frame_movement = (movement[0] + self.velocity[0] + self.last_movement[0], movement[1] + self.velocity[1] + self.last_movement[1])
 
-        self.rect.x += frame_movement[0] * 2
-        self.rect.y += frame_movement[1] * 1.7
+        self.rect.x += frame_movement[0] * 1
+        self.rect.y += frame_movement[1] * 1.3
 
         if self.rect.top > HEIGHT:
             self.game.die = True
         
-        #self.game.traps.check_player_collision(self.rect)
-        #self.game.checkpoints.check_player_collision(self.rect)
-        #self.game.fruits.check_player_collision(self.rect)
 
         #capire quando il player tocca il pavimento che può essere il pavimento ma anche una piattaforma
         #prima cosa vediamo quando tocca il pavimento
