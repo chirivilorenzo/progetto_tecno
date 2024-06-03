@@ -43,7 +43,10 @@ class Game:
             'trap': load_images('Traps'),
             'box': load_images('Boxes'),
             'checkpoint': load_images('Checkpoints'),
-            'first_player_img': load_image('Characters/Virtual Guy/idle/00.png'),
+            'first_player_img0': load_image('Characters/Virtual Guy/idle/00.png'),
+            'first_player_img1': load_image('Characters/Pink Man/idle/00.png'),
+            'first_player_img2': load_image('Characters/Ninja Frog/idle/00.png'),
+            #'first_player_img3': load_image('Characters/Mask Dude/idle/00.png'),
             'player0/idle': Animation(load_images('Characters/Virtual Guy/idle')),
             'player0/run': Animation(load_images('Characters/Virtual Guy/run')),
             'player0/jump': Animation(load_images('Characters/Virtual Guy/jump')),
@@ -305,6 +308,9 @@ def show_start_screen(screen):
                 exit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_p:
+                    #scegliere l'omino
+                    #caricare le 3 immagini degli omini e far scegliere all'utente quale usare
+                    #per scegliere usa 0, 1, 2
                     return 'play'
                 if event.key == pygame.K_a:
                     return 'ai'

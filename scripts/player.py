@@ -14,7 +14,7 @@ class Player:
         self.flip = False
         self.set_action('idle')
 
-        self.image = self.game.assets['first_player_img']
+        self.image = self.game.assets['first_player_img0']
         self.rect = self.image.get_rect(topleft = pos)
         self.rect.x = pos[0]
         self.rect.y = pos[1]
