@@ -2,6 +2,7 @@ import neat.population
 import pygame
 import os
 import neat
+import random
 from sys import exit
 from settings import *
 from scripts.utils import load_image, load_images, Animation
@@ -43,13 +44,22 @@ class Game:
             'box': load_images('Boxes'),
             'checkpoint': load_images('Checkpoints'),
             'first_player_img': load_image('Characters/Virtual Guy/idle/00.png'),
-            'player/idle': Animation(load_images('Characters/Virtual Guy/idle')),
-            'player/run': Animation(load_images('Characters/Virtual Guy/run')),
-            'player/jump': Animation(load_images('Characters/Virtual Guy/jump')),           
+            'player0/idle': Animation(load_images('Characters/Virtual Guy/idle')),
+            'player0/run': Animation(load_images('Characters/Virtual Guy/run')),
+            'player0/jump': Animation(load_images('Characters/Virtual Guy/jump')),
+            'player1/idle': Animation(load_images('Characters/Pink Man/idle')),
+            'player1/run': Animation(load_images('Characters/Pink Man/run')),
+            'player1/jump': Animation(load_images('Characters/Pink Man/jump')),
+            'player2/idle': Animation(load_images('Characters/Ninja Frog/idle')),
+            'player2/run': Animation(load_images('Characters/Ninja Frog/run')),
+            'player2/jump': Animation(load_images('Characters/Ninja Frog/jump')),
+            #'player3/idle': Animation(load_images('Characters/Mask Dude/idle')),
+            #'player3/run': Animation(load_images('Characters/Mask Dude/run')),
+            #'player3/jump': Animation(load_images('Characters/Mask Dude/jump')),                           
             'fruit': load_images('Fruits'),
         }
 
-        self.player = Player(self, START_POINT, self.scroll)
+        self.player = Player(self, START_POINT, 0, self.scroll)
         self.die = False
         self.win = False
 
@@ -201,7 +211,8 @@ class Game:
                     players.pop(i)
                     ge.pop(i)
                     nets.pop(i)
-                    continue       
+                    continue
+                
         
             self.floors.render(self.display, self.scroll)
             self.platforms.render(self.display, self.scroll)
@@ -257,7 +268,8 @@ class NeatAI:
         game = Game()
 
         for genome_id, genome in genomes:
-            players.append(Player(game, START_POINT, game.scroll))
+            num = random.randint(0, 2)
+            players.append(Player(game, START_POINT, num, game.scroll))
             ge.append(genome)
             net = neat.nn.FeedForwardNetwork.create(genome, config)
             nets.append(net)
@@ -272,8 +284,7 @@ class NeatAI:
         stats = neat.StatisticsReporter()
         p.add_reporter(stats)
 
-        result = p.run(self.eval_genomes, 500)
-        return result
+        p.run(self.eval_genomes, 500)
 
 def show_start_screen(screen):
     while True:

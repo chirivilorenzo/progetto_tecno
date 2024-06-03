@@ -2,8 +2,9 @@ import pygame
 from settings import *
 
 class Player:
-    def __init__(self, game, pos, offset=(0,0)):
+    def __init__(self, game, pos, p_type, offset=(0,0)):
         self.game = game
+        self.type = p_type
         self.velocity = [0, 0]
         self.collisions = {'up': False, 'down': False, 'left': False, 'right': False}
         self.offset = offset
@@ -22,7 +23,7 @@ class Player:
     def set_action(self, action):
         if action != self.action:
             self.action = action
-            self.animation = self.game.assets["player/" + self.action].copy()
+            self.animation = self.game.assets["player" + str(self.type) + "/" + self.action].copy()
     
     def update(self, movement=(0,0)):
         self.collisions = {'up': False, 'down': False, 'left': False, 'right': False}
