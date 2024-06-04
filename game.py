@@ -308,13 +308,38 @@ def show_start_screen(screen):
                 exit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_p:
-                    #scegliere l'omino
-                    #caricare le 3 immagini degli omini e far scegliere all'utente quale usare
-                    #per scegliere usa 0, 1, 2
-                    return 'play'
+                    return choose_pg(screen)
                 if event.key == pygame.K_a:
                     return 'ai'
 
+def choose_pg(screen):
+    #scegliere l'omino
+    #caricare le 3 immagini degli omini e far scegliere all'utente quale usare
+    #per scegliere usa 0, 1, 2
+    font = pygame.font.Font(None, 74)
+    text = font.render("Scegli il personaggio", True, (255, 255, 255))
+    text0 = font.render("Virtual Guy | 0", True, (3, 227, 252))
+    text1 = font.render("Pink Man | 1", True, (235, 84, 222))
+    text2 = font.render("Ninja Frog | 2", True, (54, 125, 45))
+
+    valuePg = '-1'
+    while valuePg == '-1':
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_0:
+                    valuePg = '0'
+                if event.key == pygame.K_1:
+                    valuePg = '1'
+                if event.key == pygame.K_2:
+                    valuePg = '2'
+
+        screen.blit(text, (WIDTH // 2 - text.get_width() // 2, HEIGHT // 2 - 100))
+        pygame.display.flip()
+    return valuePg
 def main():
     pygame.init()
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
