@@ -15,7 +15,7 @@ from scripts.fruit import Fruit, Fruits
 from scripts.map import Map
 
 class Game:
-    def __init__(self):
+    def __init__(self, character_index=0, camera_movement='indipendently'):
         pygame.init()
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         self.display = pygame.Surface((WIDTH/2, HEIGHT/2))
@@ -25,6 +25,8 @@ class Game:
         self.scroll = [0, 0]
 
         self.movement = [False, False]
+
+        self.camera_movement = camera_movement
 
         self.platforms = Platforms()
         self.floors = Floors()
@@ -62,7 +64,7 @@ class Game:
             'fruit': load_images('Fruits'),
         }
 
-        self.player = Player(self, START_POINT, 0, self.scroll)
+        self.player = Player(self, START_POINT, character_index, self.scroll)
         self.die = False
         self.win = False
 
@@ -85,7 +87,12 @@ class Game:
 
     def run(self):
         while True:
-            self.scroll[0] += 0.5
+            if self.camera_movement == 'follow':
+                self.scroll[0] += (self.player.rect.centerx - self.display.get_width() / 2 - self.scroll[0]) / 30
+                self.scroll[1] += (self.player.rect.centery - self.display.get_height() / 2 - self.scroll[1]) / 30
+            else:
+                self.scroll[0] += 0.5
+
             self.display.blit(self.assets['background'], (0,0))
 
             for event in pygame.event.get():
@@ -313,14 +320,23 @@ def show_start_screen(screen):
                     return 'ai'
 
 def choose_pg(screen):
-    #scegliere l'omino
-    #caricare le 3 immagini degli omini e far scegliere all'utente quale usare
-    #per scegliere usa 0, 1, 2
-    font = pygame.font.Font(None, 74)
-    text = font.render("Scegli il personaggio", True, (255, 255, 255))
-    text0 = font.render("Virtual Guy | 0", True, (3, 227, 252))
-    text1 = font.render("Pink Man | 1", True, (235, 84, 222))
-    text2 = font.render("Ninja Frog | 2", True, (54, 125, 45))
+    screen.fill((0, 0, 0))
+
+    clock = pygame.time.Clock()
+
+    fontTitle = pygame.font.Font(None, 74)
+    font = pygame.font.Font(None, 30)
+
+    text = fontTitle.render("Scegli il personaggio", True, (255, 255, 255))
+    text0 = font.render("Virtual Guy | 0", False, (3, 227, 252))
+    text1 = font.render("Pink Man | 1", False, (235, 84, 222))
+    text2 = font.render("Ninja Frog | 2", False, (54, 125, 45))
+
+    animations = [
+        Animation(load_images('Characters/Virtual Guy/run')),
+        Animation(load_images('Characters/Pink Man/run')),
+        Animation(load_images('Characters/Ninja Frog/run'))
+    ]
 
     valuePg = '-1'
     while valuePg == '-1':
@@ -337,9 +353,42 @@ def choose_pg(screen):
                 if event.key == pygame.K_2:
                     valuePg = '2'
 
-        screen.blit(text, (WIDTH // 2 - text.get_width() // 2, HEIGHT // 2 - 100))
+        for animation in animations:
+            animation.update()
+
+
+        screen.fill((0, 0, 0))
+        colonna = WIDTH // 3
+
+        # Fattore di scala (es: 2x)
+        scale_factor = 2
+
+        # Ottieni immagine originale
+        img0 = animations[0].img()
+        img1 = animations[1].img()
+        img2 = animations[2].img()
+
+        # Scala l'immagine dei personaggi
+        scaled_img0 = pygame.transform.scale(img0, (img0.get_width() * scale_factor, img0.get_height() * scale_factor))
+        scaled_img1 = pygame.transform.scale(img1, (img1.get_width() * scale_factor, img1.get_height() * scale_factor))
+        scaled_img2 = pygame.transform.scale(img2, (img2.get_width() * scale_factor, img2.get_height() * scale_factor))
+
+        #disegna scritta titolo e nome pg
+        screen.blit(text, (WIDTH // 2 - text.get_width() // 2, HEIGHT // 2 - 140))
+        screen.blit(text0, (colonna // 2 - text0.get_width() // 2, HEIGHT - 95))
+        screen.blit(text1, (WIDTH // 2 - text1.get_width() // 2, HEIGHT - 95))
+        screen.blit(text2, (WIDTH - colonna // 2 - text2.get_width() // 2, HEIGHT - 95))
+
+        # Disegna le animazioni dei personaggi
+        screen.blit(scaled_img0, (colonna // 2 - 32, HEIGHT // 2 - 10))
+        screen.blit(scaled_img1, (WIDTH // 2 - 32, HEIGHT // 2 - 10))
+        screen.blit(scaled_img2, (WIDTH - colonna // 2 - 32, HEIGHT // 2 - 10))
+
         pygame.display.flip()
+        clock.tick(60)
+
     return valuePg
+
 def main():
     pygame.init()
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -347,10 +396,10 @@ def main():
     while True:
         choice = show_start_screen(screen)
 
-        if choice == 'play':
+        if choice in ['0', '1', '2']:
             result = 'retry'
             while result == 'retry':
-                game = Game()
+                game = Game(character_index=choice, camera_movement='follow')
                 result = game.run()
             if result == 'menu':
                 continue
